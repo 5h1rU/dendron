@@ -26,10 +26,7 @@ import {
   tmpDir,
   vault2Path,
 } from "@dendronhq/common-server";
-import {
-  HistoryEvent,
-  HistoryService,
-} from "@dendronhq/engine-server";
+import { HistoryEvent, HistoryService } from "@dendronhq/engine-server";
 import { assign } from "comment-json";
 import { ExecaChildProcess } from "execa";
 import fs from "fs-extra";
@@ -362,13 +359,27 @@ export class VSCodeUtils {
 
   static async openNote(note: NoteProps) {
     const { vault, fname } = note;
+    const fnameWithExtension = `${fname}.md`;
+    return this.openFileInEditorUsingFullFname(vault, fnameWithExtension);
+  }
+
+  private static async openFileInEditorUsingFullFname(
+    vault: DVault,
+    fnameWithExtension: string
+  ) {
     const wsRoot = getDWorkspace().wsRoot;
     const vpath = vault2Path({ vault, wsRoot });
-    const notePath = path.join(vpath, `${fname}.md`);
+    const notePath = path.join(vpath, fnameWithExtension);
     const editor = await VSCodeUtils.openFileInEditor(
       vscode.Uri.file(notePath)
     );
     return editor as vscode.TextEditor;
+  }
+
+  static async openSchema(schema: SchemaModuleProps) {
+    const { vault, fname } = schema;
+    const fnameWithExtension = `${fname}.schema.yml`;
+    return this.openFileInEditorUsingFullFname(vault, fnameWithExtension);
   }
 
   static async openFileInEditor(
@@ -694,10 +705,14 @@ export class WSUtils {
                 wsPath = wsPathBackup;
               }
 
+              /*eslint-disable */
               // This is a workaround to resolve circular dependency.
               // TODO: fix importing around the package so that we have control over module loading sequence.
               // eslint-disable-next-line global-require
-              const { SetupWorkspaceCommand } = require("./commands/SetupWorkspace");
+              const {
+                SetupWorkspaceCommand,
+              } = require("./commands/SetupWorkspace");
+              /*eslint-enable */
               if (!wsPath) {
                 await new SetupWorkspaceCommand().run({
                   workspaceInitializer: new TutorialInitializer(),
@@ -868,8 +883,9 @@ export class DendronClientUtilsV2 {
 
   static shouldUseVaultPrefix(engine: DEngineClient) {
     const config = getDWorkspace().config;
-    const enableXVaultWikiLink = ConfigUtils.getWorkspace(config).enableXVaultWikiLink;
-    const useVaultPrefix = 
+    const enableXVaultWikiLink =
+      ConfigUtils.getWorkspace(config).enableXVaultWikiLink;
+    const useVaultPrefix =
       _.size(engine.vaults) > 1 &&
       _.isBoolean(enableXVaultWikiLink) &&
       enableXVaultWikiLink;

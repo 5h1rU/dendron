@@ -332,9 +332,16 @@ export class DNodeUtils {
 }
 
 export class NoteUtils {
+  /** Regular expression FontMatter */
   static RE_FM = /^---(.*)^---/ms;
+
+  /** Regular expression FontMatter updated. */
   static RE_FM_UPDATED = /^updated:\s+(\d+)$/m;
+
+  /** Regular expression FontMatter created. */
   static RE_FM_CREATED = /^created:.*$/m;
+
+  /** Regular expression FontMatter updated or created.  */
   static RE_FM_UPDATED_OR_CREATED =
     /^(?<beforeTimestamp>(updated|created): *)(?<timestamp>[0-9]+)$/;
 

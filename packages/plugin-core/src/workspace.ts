@@ -7,6 +7,7 @@ import {
   DWorkspaceV2,
   ERROR_STATUS,
   getStage,
+  VaultUtils,
   WorkspaceSettings,
   WorkspaceType,
 } from "@dendronhq/common-all";
@@ -59,6 +60,7 @@ import { SampleView } from "./views/SampleView";
 import { SchemaWatcher } from "./watchers/schemaWatcher";
 import { WindowWatcher } from "./windowWatcher";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
+import { Uri } from "vscode";
 
 let _DendronWorkspace: DendronExtension | null;
 
@@ -128,6 +130,17 @@ export function getEngine() {
 
 export function resolveRelToWSRoot(fpath: string): string {
   return resolvePath(fpath, getDWorkspace().wsRoot as string);
+}
+
+/** Given file uri that is within a vault within the current workspace returns the vault. */
+export function getVaultFromUri(fileUri: Uri) {
+  const { vaults } = getDWorkspace();
+  const vault = VaultUtils.getVaultByNotePath({
+    fsPath: fileUri.fsPath,
+    vaults,
+    wsRoot: getDWorkspace().wsRoot,
+  });
+  return vault;
 }
 
 // --- Main
